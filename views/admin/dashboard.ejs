@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin ALPEX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="img-login-admin" src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX">
+        <span class="brand-sub">Panel Admin</span>
+      </div>
+
+      <nav class="nav">
+        <a href="/admin" class="nav-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <!--
+        <a href="#solicitudes" class="nav-item"><i class="fas fa-file-contract"></i> Solicitudes</a>
+        <a href="#newsletter" class="nav-item"><i class="fas fa-envelope-open-text"></i> Newsletter</a>
+        -->
+        <a href="/logout" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <input id="searchInput" type="search" placeholder="Buscar solicitudes por nombre, correo, etc" />
+          <button class="btn-icon" aria-label="Buscar"><i class="fas fa-search"></i></button>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="card-mini">
+            <small>Solicitudes</small>
+            <strong><%= solicitudesTotal %></strong>
+          </div>
+          <div class="card-mini">
+            <small>Newsletter</small>
+            <strong><%= newsletterTotal %></strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+        <h2 class="section-title" id="solicitudes">Solicitudes de Clientes</h2>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Listado</h3>
+              <p class="muted">Últimas solicitudes recibidas</p>
+            </div>
+          </div>
+
+          <div class="card-body table-responsive">
+            <table class="table table-striped" id="solicitudesTable">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Correo</th>
+                  <th>Interés</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (solicitudes.length === 0) { %>
+                  <tr>
+                    <td colspan="4" class="empty">No hay solicitudes.</td>
+                  </tr>
+                <% } else { %>
+                  <% solicitudes.forEach(s => { %>
+                    <tr>
+                      <td class="td-name">
+                        <div class="name-cell">
+                          <div class="avatar" aria-hidden><%= (s.nombre_completo || '').charAt(0).toUpperCase() %></div>
+                          <div>
+                            <div class="name"><%= s.nombre_completo %></div>
+                            <div class="muted small"><%= s.telefono || '' %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><a href="mailto:<%= s.correo %>"><%= s.correo %></a></td>
+                      <td><%= s.interes_principal %></td>
+                      <td><%= new Date(s.fecha_registro).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }) %></td>
+                    </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-footer">
+            <div class="muted">Mostrando <strong><%= solicitudes.length %></strong> registros</div>
+            <div class="pagination">
+              <% if (solicitudPage > 1) { %>
+                <a href="?solicitudPage=<%= solicitudPage - 1 %>&newsletterPage=<%= newsletterPage %>" class="pag-btn">&laquo; Anterior</a>
+              <% } else { %>
+                <span class="pag-btn disabled">&laquo; Anterior</span>
+              <% } %>
+
+              <% for(let i = 1; i <= solicitudesTotalPages; i++) { %>
+                <% if (i === solicitudPage) { %>
+                  <span class="pag-btn active"><%= i %></span>
+                <% } else { %>
+                  <a href="?solicitudPage=<%= i %>&newsletterPage=<%= newsletterPage %>" class="pag-btn"><%= i %></a>
+                <% } %>
+              <% } %>
+
+              <% if (solicitudPage < solicitudesTotalPages) { %>
+                <a href="?solicitudPage=<%= solicitudPage + 1 %>&newsletterPage=<%= newsletterPage %>" class="pag-btn">Siguiente &raquo;</a>
+              <% } else { %>
+                <span class="pag-btn disabled">Siguiente &raquo;</span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title" id="newsletter">Suscritos al Newsletter</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Correos</h3>
+            </div>
+            <div class="card-body small-list">
+              <% if (newsletter.length === 0) { %>
+                <div class="empty">No hay suscritos.</div>
+              <% } else { %>
+                <ul>
+                  <% newsletter.forEach(n => { %>
+                      <li><i class="fas fa-envelope"></i><a href="mailto:<%= n.correo %>"><%= n.correo %></a> - <%= new Date(n.fecha_registro).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }) %></li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </div>
+            <div class="card-footer muted">Total: <strong><%= newsletter.length %></strong></div>
+            <div class="pagination-newsletter">
+              <% if (newsletterPage > 1) { %>
+                <a href="?newsletterPage=<%= newsletterPage - 1 %>&solicitudPage=<%= solicitudPage %>" class="pag-btn">&laquo;</a>
+              <% } else { %>
+                <span class="pag-btn disabled">&laquo;</span>
+              <% } %>
+
+              <% for(let i = 1; i <= newsletterTotalPages; i++) { %>
+                <% if (i === newsletterPage) { %>
+                  <span class="pag-btn active"><%= i %></span>
+                <% } else { %>
+                  <a href="?newsletterPage=<%= i %>&solicitudPage=<%= solicitudPage %>" class="pag-btn"><%= i %></a>
+                <% } %>
+              <% } %>
+
+              <% if (newsletterPage < newsletterTotalPages) { %>
+                <a href="?newsletterPage=<%= newsletterPage + 1 %>&solicitudPage=<%= solicitudPage %>" class="pag-btn">&raquo;</a>
+              <% } else { %>
+                <span class="pag-btn disabled">&raquo;</span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const input = document.getElementById('searchInput');
+      const table = document.getElementById('solicitudesTable');
+      if (!input || !table) return;
+      input.addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        table.querySelectorAll('tbody tr').forEach(row => {
+          if (row.classList.contains('empty')) return;
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(q) ? '' : 'none';
+        });
+      });
+    })();
+  </script>
+</body>
+
+</html>

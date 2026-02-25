@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin ALPEX - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body class="login-page">
+  <div class="login-wrapper">
+    <div class="brand-panel">
+      <h1>ALPEX</h1>
+      <p class="muted">Panel de administración</p>
+      <div class="hero-illustration" aria-hidden>
+        <img class="img-login-admin" src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX">
+      </div>
+    </div>
+
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+
+      <% if (error) { %>
+        <div class="error-msg"><i class="fas fa-exclamation-triangle"></i> <%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/login" class="form">
+        <label class="visually-hidden" for="correo">Correo</label>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input id="correo" type="email" name="correo" placeholder="Correo electrónico" required />
+        </div>
+
+        <label class="visually-hidden" for="password">Contraseña</label>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input id="password" type="password" name="password" placeholder="Contraseña" required />
+        </div>
+
+        <button class="btn primary full" type="submit">Ingresar al panel</button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>
