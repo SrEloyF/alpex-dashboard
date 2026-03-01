@@ -5,44 +5,106 @@
   <meta charset="UTF-8" />
   <title>Admin ALPEX - Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" crossorigin="anonymous">
-  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-<body class="login-page">
-  <div class="login-wrapper">
-    <div class="brand-panel">
-      <h1>ALPEX</h1>
-      <p class="muted">Panel de administración</p>
-      <div class="hero-illustration" aria-hidden>
-        <img class="img-login-admin" src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX">
+<body class="min-h-screen bg-[#0f1724] text-[#eaf0ff] flex items-center justify-center p-6">
+
+  <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+    <div
+      class="rounded-2xl p-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] backdrop-blur-xl border border-white/5 shadow-2xl">
+
+      <h1 class="text-3xl font-bold text-[#C89D40] tracking-wide">
+        ALPEX
+      </h1>
+
+      <p class="text-[#9aa4c7] mt-2">
+        Panel de administración
+      </p>
+
+      <div class="mt-8 flex justify-center lg:justify-start">
+        <img src="https://alpex-seven.vercel.app/assets/logo_alpex.png"
+          alt="ALPEX"
+          class="max-w-xs opacity-90">
       </div>
     </div>
 
-    <div class="login-card">
-      <h2>Iniciar sesión</h2>
+    <div
+      class="rounded-2xl p-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] backdrop-blur-xl border border-white/5 shadow-2xl">
+
+      <h2 class="text-2xl font-semibold mb-6">
+        Iniciar sesión
+      </h2>
 
       <% if (error) { %>
-        <div class="error-msg"><i class="fas fa-exclamation-triangle"></i> <%= error %></div>
+        <div class="mb-6 flex items-center gap-2 bg-[#ff6b6b]/10 text-[#ff6b6b] border border-[#ff6b6b]/20 px-4 py-3 rounded-lg text-sm">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+            class="w-5 h-5 inline-block align-middle"
+            fill="currentColor"
+          >
+            <path d="M320 0c18.4 0 35.3 10.1 44 26.3l270 500c8.4 15.5 8 34.3-1 49.4C624 590.8 607.6 600 590 600L50 600c-17.6 0-34-9.2-43-24.3C-2 560.6-2.4 541.8 6 526.3l270-500C284.7 10.1 301.6 0 320 0zm0 440a40 40 0 1 0 0 80 40 40 0 1 0 0-80zm0-240c-22.8 0-40.9 19.4-39.3 42.1l9.3 130c1.1 15.6 14.3 27.9 29.9 27.9 15.8 0 28.8-12.1 29.9-27.9l9.3-130c1.6-22.7-16.4-42.1-39.1-42.1z"/>
+          </svg>
+          <%= error %>
+        </div>
       <% } %>
 
-      <form method="POST" action="/login" class="form">
-        <label class="visually-hidden" for="correo">Correo</label>
-        <div class="input-group">
-          <i class="fas fa-envelope"></i>
-          <input id="correo" type="email" name="correo" placeholder="Correo electrónico" required />
+      <form method="POST" action="/login" class="space-y-6">
+
+        <div>
+          <label for="correo" class="block text-sm text-[#9aa4c7] mb-2">
+            Correo electrónico
+          </label>
+
+          <div class="relative">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+              class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[#9aa4c7] text-sm"
+              fill="currentColor"
+            >
+              <path d="M60 80C26.9 80 0 106.9 0 140c0 18.9 8.9 36.6 24 48L284 384c21.4 16 50.6 16 72 0L616 188c15.1-11.4 24-29.1 24-48 0-33.1-26.9-60-60-60L60 80zM0 245L0 480c0 44.2 35.8 80 80 80l480 0c44.2 0 80-35.8 80-80l0-235-248 186c-42.6 32-101.4 32-144 0L0 245z"/>
+            </svg>
+
+            <input id="correo"
+              type="email"
+              name="correo"
+              placeholder="Correo electrónico"
+              required
+              class="w-full pl-11 pr-4 py-3 rounded-lg bg-[rgba(255,255,255,0.03)] border border-white/5 focus:border-[#C89D40] focus:ring-1 focus:ring-[#C89D40] outline-none transition text-sm placeholder:text-[#9aa4c7]/70" />
+          </div>
         </div>
 
-        <label class="visually-hidden" for="password">Contraseña</label>
-        <div class="input-group">
-          <i class="fas fa-lock"></i>
-          <input id="password" type="password" name="password" placeholder="Contraseña" required />
+        <div>
+          <label for="password" class="block text-sm text-[#9aa4c7] mb-2">
+            Contraseña
+          </label>
+
+          <div class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle absolute left-4 top-1/2 -translate-y-1/2 text-[#9aa4c7] text-sm" fill="currentColor">
+              <path d="M128 96l0 64 128 0 0-64c0-35.3-28.7-64-64-64s-64 28.7-64 64zM64 160l0-64C64 25.3 121.3-32 192-32S320 25.3 320 96l0 64c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64z"/>
+            </svg>
+            <input id="password"
+              type="password"
+              name="password"
+              placeholder="Contraseña"
+              required
+              class="w-full pl-11 pr-4 py-3 rounded-lg bg-[rgba(255,255,255,0.03)] border border-white/5 focus:border-[#C89D40] focus:ring-1 focus:ring-[#C89D40] outline-none transition text-sm placeholder:text-[#9aa4c7]/70" />
+          </div>
         </div>
 
-        <button class="btn primary full" type="submit">Ingresar al panel</button>
+        <button type="submit"
+          class="w-full py-3 rounded-lg font-semibold text-black bg-[#C89D40] hover:bg-[#E7C77A] transition duration-300 shadow-lg shadow-[#C89D40]/20">
+          Ingresar al panel
+        </button>
+
       </form>
     </div>
+
   </div>
+
 </body>
 
 </html>

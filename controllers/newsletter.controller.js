@@ -1,5 +1,5 @@
 const Newsletter = require('./../models/newsletter.model');
-const { ValidationError, UniqueConstraintError } = require("sequelize");
+const { ValidationError, UniqueConstraintError, Op } = require("sequelize");
 
 exports.createNewsletter = async (req, res, next) => {
   try {
@@ -37,23 +37,25 @@ exports.createNewsletter = async (req, res, next) => {
   }
 };
 
-exports.getNewsletters = async (page = 1, limit = 10) => {
-  try {
-    const offset = (page - 1) * limit;
-    const total = await Newsletter.count();
+exports.getNewsletters = async (page = 1, limit = 10, filters = {}) => {
+  const offset = (page - 1) * limit;
+  const where = {};
 
-    const registros = await Newsletter.findAll({
-      order: [['fecha_registro', 'DESC']],
-      limit,
-      offset,
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    return { registros, totalPages, total };
-
-  } catch (error) {
-    console.error(error);
-    next(error);
+  if (filters.search) {
+    where.correo = { [Op.like]: `%${filters.search}%` };
   }
+  if (filters.startDate && filters.endDate) {
+    where.fecha_registro = {
+      [Op.between]: [new Date(filters.startDate), new Date(`${filters.endDate}T23:59:59.999Z`)]
+    };
+  }
+
+  const { count: total, rows: registros } = await Newsletter.findAndCountAll({
+    where,
+    order: [['fecha_registro', 'DESC']],
+    limit,
+    offset,
+  });
+
+  return { registros, totalPages: Math.ceil(total / limit) || 1, total, page };
 };

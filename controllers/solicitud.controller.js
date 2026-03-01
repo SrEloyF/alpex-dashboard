@@ -1,5 +1,5 @@
 const Solicitud = require('./../models/solicitud.model');
-const { ValidationError, UniqueConstraintError } = require("sequelize");
+const { ValidationError, UniqueConstraintError, Op } = require("sequelize");
 const sendEmail = require("../utils/resendMailer");
 
 exports.createSolicitud = async (req, res, next) => {
@@ -101,6 +101,32 @@ exports.createSolicitud = async (req, res, next) => {
   }
 };
 
+exports.getSolicitudesByStatus = async (estado, page = 1, limit = 5, filters = {}) => {
+  const offset = (page - 1) * limit;
+  const where = { estado };
+
+  if (filters.search) {
+    where[Op.or] = [
+      { nombre_completo: { [Op.like]: `%${filters.search}%` } },
+      { correo: { [Op.like]: `%${filters.search}%` } }
+    ];
+  }
+  if (filters.startDate && filters.endDate) {
+    where.fecha_registro = {
+      [Op.between]: [new Date(filters.startDate), new Date(`${filters.endDate}T23:59:59.999Z`)]
+    };
+  }
+
+  const { count: total, rows: registros } = await Solicitud.findAndCountAll({
+    where,
+    order: [['fecha_registro', 'DESC']],
+    limit,
+    offset,
+  });
+
+  return { registros, totalPages: Math.ceil(total / limit) || 1, total, page };
+};
+
 exports.getSolicitudes = async (page = 1, limit = 10) => {
   try {
     const offset = (page - 1) * limit;
@@ -115,6 +141,78 @@ exports.getSolicitudes = async (page = 1, limit = 10) => {
     const totalPages = Math.ceil(total / limit);
 
     return { registros, totalPages, total };
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+exports.updateSolicitud = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const camposPermitidos = [
+      'estado',
+      'notas_internas'
+    ];
+
+    const datosActualizar = {};
+
+    camposPermitidos.forEach(campo => {
+      if (req.body[campo] !== undefined) {
+        datosActualizar[campo] = req.body[campo];
+      }
+    });
+
+    if (Object.keys(datosActualizar).length === 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'No se enviaron campos válidos para actualizar'
+      });
+    }
+
+    const [updated] = await Solicitud.update(datosActualizar, {
+      where: { id }
+    });
+
+    if (!updated) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Solicitud no encontrada'
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Solicitud actualizada correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+exports.deleteSolicitud = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const solicitud = await Solicitud.findByPk(id);
+
+    if (!solicitud) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Solicitud no encontrada'
+      });
+    }
+
+    await solicitud.destroy();
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Solicitud eliminada correctamente'
+    });
 
   } catch (error) {
     console.error(error);

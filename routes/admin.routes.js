@@ -8,25 +8,46 @@ const authMiddleware = require('../middlewares/adminAuth');
 router.get('/login', adminController.loginView);
 router.post('/login', adminController.login);
 router.get('/logout', adminController.logout);
+router.patch('/solicitudes/:id', authMiddleware, solicitudController.updateSolicitud);
+router.delete('/solicitudes/:id',authMiddleware, solicitudController.deleteSolicitud);
 
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    const solicitudPage = parseInt(req.query.solicitudPage) || 1;
+    const pageNuevo = parseInt(req.query.pageNuevo) || 1;
+    const pageNegociacion = parseInt(req.query.pageNegociacion) || 1;
+    const pageCerrado = parseInt(req.query.pageCerrado) || 1;
     const newsletterPage = parseInt(req.query.newsletterPage) || 1;
-    const limit = 8;
+    
+    const filtersLeads = {
+      search: req.query.searchLeads || '',
+      startDate: req.query.startLeads || '',
+      endDate: req.query.endLeads || ''
+    };
 
-    const newsletterData = await newsletterController.getNewsletters(newsletterPage, limit);
-    const solicitudesData = await solicitudController.getSolicitudes(solicitudPage, limit);
+    const filtersNews = {
+      search: req.query.searchNews || '',
+      startDate: req.query.startNews || '',
+      endDate: req.query.endNews || ''
+    };
+
+    const [nuevoData, negociacionData, cerradoData, newsletterData] = await Promise.all([
+      solicitudController.getSolicitudesByStatus('Nuevo', pageNuevo, 5, filtersLeads),
+      solicitudController.getSolicitudesByStatus('Negociacion', pageNegociacion, 5, filtersLeads),
+      solicitudController.getSolicitudesByStatus('Cerrado', pageCerrado, 5, filtersLeads),
+      newsletterController.getNewsletters(newsletterPage, 10, filtersNews)
+    ]);
+
+    const board = {
+      'Nuevo': nuevoData,
+      'Negociacion': negociacionData,
+      'Cerrado': cerradoData
+    };
 
     res.render('admin/dashboard', {
-      newsletter: newsletterData.registros,
-      newsletterTotalPages: newsletterData.totalPages,
-      newsletterTotal: newsletterData.total,
-      newsletterPage,
-      solicitudes: solicitudesData.registros,
-      solicitudesTotalPages: solicitudesData.totalPages,
-      solicitudesTotal: solicitudesData.total,
-      solicitudPage,
+      board,
+      newsletterData,
+      query: req.query, 
+      solicitudesTotal: nuevoData.total + negociacionData.total + cerradoData.total
     });
     
   } catch (error) {

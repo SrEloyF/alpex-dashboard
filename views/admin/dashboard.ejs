@@ -5,181 +5,652 @@
   <meta charset="UTF-8" />
   <title>Admin ALPEX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" crossorigin="anonymous">
-  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      --glass: rgba(255, 255, 255, 0.03);
+      --accent-1: #C89D40;
+      --accent-2: #E7C77A;
+      --muted: #9aa4c7;
+      --text: #eaf0ff;
+      --success: #2ecc71;
+      --danger: #ff6b6b;
+      --modal-bg: #1a2234;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    #modalContent::-webkit-scrollbar {
+      display: block;
+      width: 8px;
+    }
+
+    #modalContent::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.3);
+      border-radius: 8px;
+    }
+
+    #modalContent::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .bg-glass {
+      background: var(--glass);
+    }
+
+    .bg-accent {
+      background-color: var(--accent-1);
+    }
+
+    .text-muted {
+      color: var(--muted);
+    }
+
+    .text-accent {
+      color: var(--accent-1);
+    }
+
+    .kanban-column {
+      min-height: 400px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    svg.girar {
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
 </head>
 
-<body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <img class="img-login-admin" src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX">
-        <span class="brand-sub">Panel Admin</span>
+<body class="flex min-h-screen">
+  <aside class="w-64 bg-glass border-r border-white/10 p-6 flex flex-col hidden md:flex">
+    <div class="mb-10 text-center">
+      <img src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX" class="w-32 mx-auto mb-4">
+      <span class="text-muted text-sm tracking-widest uppercase">Panel Admin</span>
+    </div>
+    <nav class="flex flex-col gap-2">
+      <a href="/" class="p-3 rounded bg-white/5 text-white flex items-center gap-3">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          class="w-5 h-5 inline-block align-middle"
+          fill="currentColor"
+        >
+          <path d="M96 160C96 124.7 124.7 96 160 96L480 96C515.3 96 544 124.7 544 160L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 160zM160 224L160 480L288 480L288 224L160 224zM480 224L352 224L352 480L480 480L480 224z"/>
+        </svg>
+        Dashboard</a>
+      <a href="/logout"
+        class="p-3 rounded hover:bg-white/5 text-muted hover:text-white transition flex items-center gap-3 mt-auto">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          class="w-5 h-5 inline-block align-middle"
+          fill="currentColor"
+        >
+          <path d="M569 337C578.4 327.6 578.4 312.4 569 303.1L425 159C418.1 152.1 407.8 150.1 398.8 153.8C389.8 157.5 384 166.3 384 176L384 256L272 256C245.5 256 224 277.5 224 304L224 336C224 362.5 245.5 384 272 384L384 384L384 464C384 473.7 389.8 482.5 398.8 486.2C407.8 489.9 418.1 487.9 425 481L569 337zM224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160z"/>
+        </svg>
+        Cerrar sesión</a>
+    </nav>
+  </aside>
+
+  <main class="flex-1 p-8">
+
+    <div class="flex justify-end gap-3 mb-8">
+      <button onclick="switchTab('solicitudes')" id="btn-sol"
+        class="px-5 py-2 rounded-lg bg-accent text-black font-bold flex items-center gap-2">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          class="w-5 h-5 inline-block align-middle"
+          fill="currentColor"
+        >
+          <path d="M104 112C90.7 112 80 122.7 80 136L80 184C80 197.3 90.7 208 104 208L152 208C165.3 208 176 197.3 176 184L176 136C176 122.7 165.3 112 152 112L104 112zM256 128C238.3 128 224 142.3 224 160C224 177.7 238.3 192 256 192L544 192C561.7 192 576 177.7 576 160C576 142.3 561.7 128 544 128L256 128zM256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L256 288zM256 448C238.3 448 224 462.3 224 480C224 497.7 238.3 512 256 512L544 512C561.7 512 576 497.7 576 480C576 462.3 561.7 448 544 448L256 448zM80 296L80 344C80 357.3 90.7 368 104 368L152 368C165.3 368 176 357.3 176 344L176 296C176 282.7 165.3 272 152 272L104 272C90.7 272 80 282.7 80 296zM104 432C90.7 432 80 442.7 80 456L80 504C80 517.3 90.7 528 104 528L152 528C165.3 528 176 517.3 176 504L176 456C176 442.7 165.3 432 152 432L104 432z"/>
+        </svg>
+        Leads (<%= solicitudesTotal %>)</button>
+      <button onclick="switchTab('newsletter')" id="btn-news" 
+        class="px-5 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 flex items-center gap-2">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          class="w-5 h-5 inline-block align-middle"
+          fill="currentColor"
+        >
+          <path d="M112 128C85.5 128 64 149.5 64 176C64 191.1 71.1 205.3 83.2 214.4L291.2 370.4C308.3 383.2 331.7 383.2 348.8 370.4L556.8 214.4C568.9 205.3 576 191.1 576 176C576 149.5 554.5 128 528 128L112 128zM64 260L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 260L377.6 408.8C343.5 434.4 296.5 434.4 262.4 408.8L64 260z"/>
+        </svg>
+        Newsletter (<%= newsletterData.total %>)
+      </button>
+    </div>
+
+    <section id="tab-solicitudes">
+      <form method="GET" action="/" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 bg-glass p-4 rounded-xl border border-white/10">
+        <input type="hidden" name="tab" value="solicitudes">
+        
+        <input type="hidden" name="searchNews" value="<%= query.searchNews || '' %>">
+        <input type="hidden" name="startNews" value="<%= query.startNews || '' %>">
+        <input type="hidden" name="endNews" value="<%= query.endNews || '' %>">
+        
+        <input type="text" name="searchLeads" value="<%= query.searchLeads || '' %>" placeholder="Buscar lead..." class="bg-black/20 border border-white/10 p-3 rounded-lg text-sm text-white outline-none focus:border-accent-1">
+        <input type="date" name="startLeads" value="<%= query.startLeads || '' %>" class="bg-black/20 border border-white/10 p-3 rounded-lg text-sm text-muted outline-none focus:border-accent-1">
+        <input type="date" name="endLeads" value="<%= query.endLeads || '' %>" class="bg-black/20 border border-white/10 p-3 rounded-lg text-sm text-muted outline-none focus:border-accent-1">
+        
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 bg-accent text-black font-bold rounded-lg py-3 hover:bg-yellow-500 transition">Filtrar Leads</button>
+          <% if(query.searchLeads || query.startLeads) { %>
+            <a href="/?tab=solicitudes" class="px-4 bg-white/10 text-white rounded-lg py-3 flex items-center hover:bg-white/20">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 640 640"
+                class="w-5 h-5 inline-block align-middle"
+                fill="currentColor"
+              >
+                <path d="M183.1 137.4C170.6 124.9 150.3 124.9 137.8 137.4C125.3 149.9 125.3 170.2 137.8 182.7L275.2 320L137.9 457.4C125.4 469.9 125.4 490.2 137.9 502.7C150.4 515.2 170.7 515.2 183.2 502.7L320.5 365.3L457.9 502.6C470.4 515.1 490.7 515.1 503.2 502.6C515.7 490.1 515.7 469.8 503.2 457.3L365.8 320L503.1 182.6C515.6 170.1 515.6 149.8 503.1 137.3C490.6 124.8 470.3 124.8 457.8 137.3L320.5 274.7L183.1 137.4z"/>
+              </svg>
+            </a>
+          <% } %>
+        </div>
+      </form>
+
+      <% 
+        const getPageUrl = (target, targetPage) => {
+          let pNuevo = target === 'Nuevo' ? targetPage : (query.pageNuevo || 1);
+          let pNeg = target === 'Negociacion' ? targetPage : (query.pageNegociacion || 1);
+          let pCer = target === 'Cerrado' ? targetPage : (query.pageCerrado || 1);
+          let pNews = target === 'Newsletter' ? targetPage : (query.newsletterPage || 1);
+          
+          let currentTab = target === 'Newsletter' ? 'newsletter' : (target ? 'solicitudes' : (query.tab || 'solicitudes'));
+          
+          return `?pageNuevo=${pNuevo}&pageNegociacion=${pNeg}&pageCerrado=${pCer}&newsletterPage=${pNews}&searchLeads=${query.searchLeads || ''}&startLeads=${query.startLeads || ''}&endLeads=${query.endLeads || ''}&searchNews=${query.searchNews || ''}&startNews=${query.startNews || ''}&endNews=${query.endNews || ''}&tab=${currentTab}`;
+        }
+      %>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <% const estados=['Nuevo', 'Negociacion' , 'Cerrado' ]; %>
+          <% estados.forEach(status=> { %>
+            <div class="kanban-column flex flex-col bg-glass rounded-xl p-4 border border-white/10">
+
+              <h3 class="font-bold mb-4 flex justify-between items-center text-lg border-b border-white/10 pb-2">
+                <%= status %>
+                  <span class="bg-black/30 text-xs px-2 py-1 rounded-full text-muted">
+                    <%= board[status].total %>
+                  </span>
+              </h3>
+
+              <div id="col-<%= status %>" data-status="<%= status %>" class="space-y-4 sortable-list flex-1">
+                <% board[status].registros.forEach(s=> { %>
+                  <div data-id="<%= s.id %>" class="p-4 rounded-lg bg-[#161f30] border border-white/5 cursor-grab active:cursor-grabbing hover:border-accent-1 transition-all group" onclick='openModal(<%- JSON.stringify(s).replace(/'/g, "\\'") %>)'>
+                  <div class="flex justify-between items-start mb-2">
+                    <p class="font-bold text-white group-hover:text-accent-1 transition"><%= s.nombre_completo %></p>
+                    <div class="w-2 h-2 rounded-full <%= status === 'Nuevo' ? 'bg-blue-500' : status === 'Negociacion' ? 'bg-yellow-500' : 'bg-green-500' %>"></div>
+                  </div>
+                  <p class="text-xs text-muted mb-3 flex items-center gap-2">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 640 640"
+                      class="w-5 h-5 inline-block align-middle"
+                      fill="currentColor"
+                    >
+                      <path d="M112 128C85.5 128 64 149.5 64 176C64 191.1 71.1 205.3 83.2 214.4L291.2 370.4C308.3 383.2 331.7 383.2 348.8 370.4L556.8 214.4C568.9 205.3 576 191.1 576 176C576 149.5 554.5 128 528 128L112 128zM64 260L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 260L377.6 408.8C343.5 434.4 296.5 434.4 262.4 408.8L64 260z"/>
+                    </svg>
+                    <%= s.correo %>
+                  </p>
+                  <div class="flex justify-between items-center text-[10px] uppercase font-bold tracking-wider border-t border-white/10 pt-3">
+                    <%
+                      const interesLabels = {
+                        Reinos: 'Reinos de Gondor',
+                        Colinas: 'Colinas del Golf',
+                        Inversion: 'Quiero ser inversionista'
+                      };
+                    %>
+
+                    <span class="text-accent-2">
+                      <%= interesLabels[s.interes_principal] %>
+                    </span>
+                    <span class="text-muted"><%= new Date(s.fecha_registro).toLocaleDateString() %></span>
+                  </div>
+                </div>
+                <% }) %>
+              </div>
+
+              <% if (board[status].totalPages > 1) { %>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/10 text-xs">
+                  <% if (board[status].page > 1) { %>
+                    <a href="<%= getPageUrl(status, board[status].page - 1) %>" class="text-accent-1 hover:text-white">&laquo; Ant</a>
+                  <% } else { %> <span class="text-white/20">&laquo; Ant</span> <% } %>
+                  
+                  <span class="text-muted">Pág <%= board[status].page %> de <%= board[status].totalPages %></span>
+                  
+                  <% if (board[status].page < board[status].totalPages) { %>
+                    <a href="<%= getPageUrl(status, board[status].page + 1) %>" class="text-accent-1 hover:text-white">Sig &raquo;</a>
+                  <% } else { %> <span class="text-white/20">Sig &raquo;</span> <% } %>
+                </div>
+              <% } %>
+
+            </div>
+            <% }) %>
+      </div>
+    </section>
+
+    <section id="tab-newsletter" class="hidden">
+      <form method="GET" action="/" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 bg-glass p-4 rounded-xl border border-white/10">
+        <input type="hidden" name="tab" value="newsletter">
+        
+        <input type="hidden" name="searchLeads" value="<%= query.searchLeads || '' %>">
+        <input type="hidden" name="startLeads" value="<%= query.startLeads || '' %>">
+        <input type="hidden" name="endLeads" value="<%= query.endLeads || '' %>">
+        
+        <input type="text" name="searchNews" value="<%= query.searchNews || '' %>" placeholder="Buscar correo..." class="bg-black/20 border border-white/10 p-3 rounded-lg text-sm text-white outline-none focus:border-accent-1">
+        <input type="date" name="startNews" value="<%= query.startNews || '' %>" class="bg-black/20 border border-white/10 p-3 rounded-lg text-sm text-muted outline-none focus:border-accent-1">
+        <input type="date" name="endNews" value="<%= query.endNews || '' %>" class="bg-black/20 border border-white/10 p-3 rounded-lg text-sm text-muted outline-none focus:border-accent-1">
+        
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 bg-accent text-black font-bold rounded-lg py-3 hover:bg-yellow-500 transition">Filtrar Newsletter</button>
+          <% if(query.searchNews || query.startNews) { %>
+            <a href="/?tab=newsletter" class="px-4 bg-white/10 text-white rounded-lg py-3 flex items-center hover:bg-white/20">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-5 h-5 inline-block align-middle" fill="currentColor">
+                <path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/>
+              </svg>
+            </a>
+          <% } %>
+        </div>
+      </form>
+
+      <div class="bg-glass rounded-xl border border-white/10 overflow-hidden">
+        <!-- Comienza la tabla -->
+        <table class="w-full text-left">
+          <thead class="bg-black/20 text-muted text-sm uppercase">
+            <tr>
+              <th class="p-5 font-medium">Correo Suscrito</th>
+              <th class="p-5 font-medium">Fecha de Registro</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            <% newsletterData.registros.forEach(n=> { %>
+              <tr class="hover:bg-white/5 transition">
+                <td class="p-5 flex items-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+                    <path d="M112 128C85.5 128 64 149.5 64 176C64 191.1 71.1 205.3 83.2 214.4L291.2 370.4C308.3 383.2 331.7 383.2 348.8 370.4L556.8 214.4C568.9 205.3 576 191.1 576 176C576 149.5 554.5 128 528 128L112 128zM64 260L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 260L377.6 408.8C343.5 434.4 296.5 434.4 262.4 408.8L64 260z"/>
+                  </svg>
+                  <%= n.correo %>
+                </td>
+                <td class="p-5 text-muted">
+                  <%= new Date(n.fecha_registro).toLocaleString('es-PE') %>
+                </td>
+              </tr>
+              <% }) %>
+          </tbody>
+        </table>
+      
+        <!-- Barra de paginación -->
+        <% if (newsletterData.totalPages> 1) { %>
+          <div class="flex justify-between items-center mt-4 p-4 border-t border-white/10 text-sm bg-glass rounded-b-xl">
+            <% if (newsletterData.page> 1) { %>
+              <a href="<%= getPageUrl('Newsletter', newsletterData.page - 1) %>"
+                class="text-accent-1 hover:text-white font-bold">&laquo; Anterior</a>
+              <% } else { %>
+                <span class="text-white/20">&laquo; Anterior</span>
+                <% } %>
+      
+                  <span class="text-muted">Página <%= newsletterData.page %> de <%= newsletterData.totalPages %></span>
+      
+                  <% if (newsletterData.page < newsletterData.totalPages) { %>
+                    <a href="<%= getPageUrl('Newsletter', newsletterData.page + 1) %>"
+                      class="text-accent-1 hover:text-white font-bold">Siguiente &raquo;</a>
+                    <% } else { %>
+                      <span class="text-white/20">Siguiente &raquo;</span>
+                      <% } %>
+          </div>
+          <% } %>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="leadModal" class="fixed inset-0 z-50 hidden flex items-center justify-center 
+            bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-300 p-4">
+
+    <div id="modalContent" class="bg-[var(--modal-bg)] border border-white/10 rounded-2xl 
+              w-full max-w-2xl 
+              max-h-[90vh] overflow-y-auto
+              p-6 md:p-8 
+              relative transform scale-95 transition-transform duration-300 shadow-2xl">
+
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-xl">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-5 h-5 inline-block align-middle" fill="currentColor">
+          <path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/>
+        </svg>
+      </button>
+
+      <h2 id="modalName" class="text-3xl font-bold text-white mb-1">Nombre del Lead</h2>
+      <p id="modalEmailSubtitle" class="text-muted text-sm mb-8 border-b border-white/10 pb-4">correo@ejemplo.com</p>
+
+      <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
+        <div>
+          <p class="text-muted text-xs flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M192 64C156.7 64 128 92.7 128 128L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 128C512 92.7 483.3 64 448 64L192 64zM288 416L352 416C396.2 416 432 451.8 432 496C432 504.8 424.8 512 416 512L224 512C215.2 512 208 504.8 208 496C208 451.8 243.8 416 288 416zM264 320C264 289.1 289.1 264 320 264C350.9 264 376 289.1 376 320C376 350.9 350.9 376 320 376C289.1 376 264 350.9 264 320zM280 128L360 128C373.3 128 384 138.7 384 152C384 165.3 373.3 176 360 176L280 176C266.7 176 256 165.3 256 152C256 138.7 266.7 128 280 128z"/>
+            </svg>
+            Estado</p>
+          <p id="modalEstado" class="text-white font-medium">Lead Nuevo</p>
+        </div>
+        <div>
+          <p class="text-muted text-xs flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M192 64C156.7 64 128 92.7 128 128L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 128C512 92.7 483.3 64 448 64L192 64zM304 416L336 416C353.7 416 368 430.3 368 448L368 528L272 528L272 448C272 430.3 286.3 416 304 416zM224 176C224 167.2 231.2 160 240 160L272 160C280.8 160 288 167.2 288 176L288 208C288 216.8 280.8 224 272 224L240 224C231.2 224 224 216.8 224 208L224 176zM368 160L400 160C408.8 160 416 167.2 416 176L416 208C416 216.8 408.8 224 400 224L368 224C359.2 224 352 216.8 352 208L352 176C352 167.2 359.2 160 368 160zM224 304C224 295.2 231.2 288 240 288L272 288C280.8 288 288 295.2 288 304L288 336C288 344.8 280.8 352 272 352L240 352C231.2 352 224 344.8 224 336L224 304zM368 288L400 288C408.8 288 416 295.2 416 304L416 336C416 344.8 408.8 352 400 352L368 352C359.2 352 352 344.8 352 336L352 304C352 295.2 359.2 288 368 288z"/>
+            </svg>
+            Interés Principal</p>
+          <p id="modalInteres" class="text-white font-medium">Reinos</p>
+        </div>
+        <div>
+          <p class="text-muted text-xs flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M112 128C85.5 128 64 149.5 64 176C64 191.1 71.1 205.3 83.2 214.4L291.2 370.4C308.3 383.2 331.7 383.2 348.8 370.4L556.8 214.4C568.9 205.3 576 191.1 576 176C576 149.5 554.5 128 528 128L112 128zM64 260L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 260L377.6 408.8C343.5 434.4 296.5 434.4 262.4 408.8L64 260z"/>
+            </svg>
+            Correo</p>
+          <p id="modalCorreo" class="text-white font-medium">correo@gmail.com</p>
+        </div>
+        <div>
+          <p class="text-muted text-xs flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M224.2 89C216.3 70.1 195.7 60.1 176.1 65.4L170.6 66.9C106 84.5 50.8 147.1 66.9 223.3C104 398.3 241.7 536 416.7 573.1C493 589.3 555.5 534 573.1 469.4L574.6 463.9C580 444.2 569.9 423.6 551.1 415.8L453.8 375.3C437.3 368.4 418.2 373.2 406.8 387.1L368.2 434.3C297.9 399.4 241.3 341 208.8 269.3L253 233.3C266.9 222 271.6 202.9 264.8 186.3L224.2 89z"/>
+            </svg>
+            Teléfono</p>
+          <p id="modalTelefono" class="text-white font-medium">+51 ...</p>
+        </div>
+        <div>
+          <p class="text-muted text-xs flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M320 544C461.4 544 576 436.5 576 304C576 171.5 461.4 64 320 64C178.6 64 64 171.5 64 304C64 358.3 83.2 408.3 115.6 448.5L66.8 540.8C62 549.8 63.5 560.8 70.4 568.3C77.3 575.8 88.2 578.1 97.5 574.1L215.9 523.4C247.7 536.6 282.9 544 320 544zM192 272C209.7 272 224 286.3 224 304C224 321.7 209.7 336 192 336C174.3 336 160 321.7 160 304C160 286.3 174.3 272 192 272zM320 272C337.7 272 352 286.3 352 304C352 321.7 337.7 336 320 336C302.3 336 288 321.7 288 304C288 286.3 302.3 272 320 272zM416 304C416 286.3 430.3 272 448 272C465.7 272 480 286.3 480 304C480 321.7 465.7 336 448 336C430.3 336 416 321.7 416 304z"/>
+            </svg>
+            Servicio Solicitado</p>
+          <p id="modalServicio" class="text-white font-medium">Contacto Web</p>
+        </div>
+        <div>
+          <p class="text-muted text-xs flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M224 64C241.7 64 256 78.3 256 96L256 128L384 128L384 96C384 78.3 398.3 64 416 64C433.7 64 448 78.3 448 96L448 128L480 128C515.3 128 544 156.7 544 192L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 192C96 156.7 124.7 128 160 128L192 128L192 96C192 78.3 206.3 64 224 64zM160 304L160 336C160 344.8 167.2 352 176 352L208 352C216.8 352 224 344.8 224 336L224 304C224 295.2 216.8 288 208 288L176 288C167.2 288 160 295.2 160 304zM288 304L288 336C288 344.8 295.2 352 304 352L336 352C344.8 352 352 344.8 352 336L352 304C352 295.2 344.8 288 336 288L304 288C295.2 288 288 295.2 288 304zM432 288C423.2 288 416 295.2 416 304L416 336C416 344.8 423.2 352 432 352L464 352C472.8 352 480 344.8 480 336L480 304C480 295.2 472.8 288 464 288L432 288zM160 432L160 464C160 472.8 167.2 480 176 480L208 480C216.8 480 224 472.8 224 464L224 432C224 423.2 216.8 416 208 416L176 416C167.2 416 160 423.2 160 432zM304 416C295.2 416 288 423.2 288 432L288 464C288 472.8 295.2 480 304 480L336 480C344.8 480 352 472.8 352 464L352 432C352 423.2 344.8 416 336 416L304 416zM416 432L416 464C416 472.8 423.2 480 432 480L464 480C472.8 480 480 472.8 480 464L480 432C480 423.2 472.8 416 464 416L432 416C423.2 416 416 423.2 416 432z"/>
+            </svg>
+            Fecha de Creación</p>
+          <p id="modalFecha" class="text-white font-medium">...</p>
+        </div>
       </div>
 
-      <nav class="nav">
-        <a href="/admin" class="nav-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <!--
-        <a href="#solicitudes" class="nav-item"><i class="fas fa-file-contract"></i> Solicitudes</a>
-        <a href="#newsletter" class="nav-item"><i class="fas fa-envelope-open-text"></i> Newsletter</a>
-        -->
-        <a href="/logout" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
-      </nav>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div class="search">
-          <input id="searchInput" type="search" placeholder="Buscar solicitudes por nombre, correo, etc" />
-          <button class="btn-icon" aria-label="Buscar"><i class="fas fa-search"></i></button>
+      <div class="mb-6">
+        <p class="text-muted text-xs flex items-center gap-2 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+            <path d="M96 280C96 213.7 149.7 160 216 160L224 160C241.7 160 256 174.3 256 192C256 209.7 241.7 224 224 224L216 224C185.1 224 160 249.1 160 280L160 288L224 288C259.3 288 288 316.7 288 352L288 416C288 451.3 259.3 480 224 480L160 480C124.7 480 96 451.3 96 416L96 280zM352 280C352 213.7 405.7 160 472 160L480 160C497.7 160 512 174.3 512 192C512 209.7 497.7 224 480 224L472 224C441.1 224 416 249.1 416 280L416 288L480 288C515.3 288 544 316.7 544 352L544 416C544 451.3 515.3 480 480 480L416 480C380.7 480 352 451.3 352 416L352 280z"/>
+          </svg>
+          Mensaje del Cliente</p>
+        <div id="modalMensaje"
+          class="bg-black/30 border border-white/5 p-4 rounded-lg text-sm text-gray-300 min-h-[60px] italic">
+          Sin mensaje.
         </div>
+      </div>
 
-        <div class="topbar-actions">
-          <div class="card-mini">
-            <small>Solicitudes</small>
-            <strong><%= solicitudesTotal %></strong>
-          </div>
-          <div class="card-mini">
-            <small>Newsletter</small>
-            <strong><%= newsletterTotal %></strong>
-          </div>
+      <div class="mb-8">
+        <div class="flex justify-between items-end mb-2">
+          <p class="text-muted text-xs flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle text-accent-1" fill="currentColor">
+              <path d="M416.9 85.2L372 130.1L509.9 268L554.8 223.1C568.4 209.6 576 191.2 576 172C576 152.8 568.4 134.4 554.8 120.9L519.1 85.2C505.6 71.6 487.2 64 468 64C448.8 64 430.4 71.6 416.9 85.2zM338.1 164L122.9 379.1C112.2 389.8 104.4 403.2 100.3 417.8L64.9 545.6C62.6 553.9 64.9 562.9 71.1 569C77.3 575.1 86.2 577.5 94.5 575.2L222.3 539.7C236.9 535.6 250.2 527.9 261 517.1L476 301.9L338.1 164z"/>
+            </svg>
+            Notas Internas
+          </p>
+          <button onclick="guardarNotas()"
+            class="text-xs bg-white/10 hover:bg-accent-1 hover:text-black text-white px-3 py-1 rounded transition">Guardar
+            Nota</button>
         </div>
-      </header>
+        <textarea id="modalNotas"
+          class="w-full bg-black/30 border border-white/10 p-3 rounded-lg text-sm text-white focus:outline-none focus:border-accent-1 resize-none placeholder-gray-600"
+          rows="2" placeholder="Añade observaciones sobre este lead..."></textarea>
+      </div>
 
-      <section class="content">
-        <h2 class="section-title" id="solicitudes">Solicitudes de Clientes</h2>
+      <div class="w-full">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
 
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h3>Listado</h3>
-              <p class="muted">Últimas solicitudes recibidas</p>
-            </div>
-          </div>
+        <a id="btnWhatsapp" href="#" target="_blank"
+          class="w-full sm:flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-4 sm:py-3 rounded-xl text-center flex items-center justify-center gap-2 transition shadow-md text-base">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
+            class="w-6 h-6 md:w-7 md:h-7 shrink-0" fill="currentColor">
+            <path d="M380.9 97.1c-41.9-42-97.7-65.1-157-65.1-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480 117.7 449.1c32.4 17.7 68.9 27 106.1 27l.1 0c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3 18.6-68.1-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1s56.2 81.2 56.1 130.5c0 101.8-84.9 184.6-186.6 184.6zM325.1 300.5c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8s-14.3 18-17.6 21.8c-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7s-12.5-30.1-17.1-41.2c-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2s-9.7 1.4-14.8 6.9c-5.1 5.6-19.4 19-19.4 46.3s19.9 53.7 22.6 57.4c2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4s4.6-24.1 3.2-26.4c-1.3-2.5-5-3.9-10.5-6.6z"/>
+          </svg>
 
-          <div class="card-body table-responsive">
-            <table class="table table-striped" id="solicitudesTable">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Correo</th>
-                  <th>Interés</th>
-                  <th>Fecha</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% if (solicitudes.length === 0) { %>
-                  <tr>
-                    <td colspan="4" class="empty">No hay solicitudes.</td>
-                  </tr>
-                <% } else { %>
-                  <% solicitudes.forEach(s => { %>
-                    <tr>
-                      <td class="td-name">
-                        <div class="name-cell">
-                          <div class="avatar" aria-hidden><%= (s.nombre_completo || '').charAt(0).toUpperCase() %></div>
-                          <div>
-                            <div class="name"><%= s.nombre_completo %></div>
-                            <div class="muted small"><%= s.telefono || '' %></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><a href="mailto:<%= s.correo %>"><%= s.correo %></a></td>
-                      <td><%= s.interes_principal %></td>
-                      <td><%= new Date(s.fecha_registro).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }) %></td>
-                    </tr>
-                  <% }) %>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
+          <span>WhatsApp</span>
+        </a>
 
-          <div class="card-footer">
-            <div class="muted">Mostrando <strong><%= solicitudes.length %></strong> registros</div>
-            <div class="pagination">
-              <% if (solicitudPage > 1) { %>
-                <a href="?solicitudPage=<%= solicitudPage - 1 %>&newsletterPage=<%= newsletterPage %>" class="pag-btn">&laquo; Anterior</a>
-              <% } else { %>
-                <span class="pag-btn disabled">&laquo; Anterior</span>
-              <% } %>
+        <a id="btnGmail" href="#" target="_blank"
+          class="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 sm:py-3 rounded-xl text-center flex items-center justify-center gap-2 transition shadow-md text-base">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+            class="w-6 h-6 md:w-7 md:h-7 shrink-0" fill="currentColor">
+            <path d="M112 128C85.5 128 64 149.5 64 176C64 191.1 71.1 205.3 83.2 214.4L291.2 370.4C308.3 383.2 331.7 383.2 348.8 370.4L556.8 214.4C568.9 205.3 576 191.1 576 176C576 149.5 554.5 128 528 128L112 128zM64 260L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 260L377.6 408.8C343.5 434.4 296.5 434.4 262.4 408.8L64 260z"/>
+          </svg>
 
-              <% for(let i = 1; i <= solicitudesTotalPages; i++) { %>
-                <% if (i === solicitudPage) { %>
-                  <span class="pag-btn active"><%= i %></span>
-                <% } else { %>
-                  <a href="?solicitudPage=<%= i %>&newsletterPage=<%= newsletterPage %>" class="pag-btn"><%= i %></a>
-                <% } %>
-              <% } %>
+          <span>Gmail</span>
+        </a>
 
-              <% if (solicitudPage < solicitudesTotalPages) { %>
-                <a href="?solicitudPage=<%= solicitudPage + 1 %>&newsletterPage=<%= newsletterPage %>" class="pag-btn">Siguiente &raquo;</a>
-              <% } else { %>
-                <span class="pag-btn disabled">Siguiente &raquo;</span>
-              <% } %>
-            </div>
-          </div>
-        </div>
+        <button id="btnEliminar" onclick="eliminarSolicitud()"
+          class="w-full sm:w-auto sm:flex-1 px-6 bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-semibold py-4 sm:py-3 rounded-xl flex items-center justify-center gap-2 transition text-base">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+            class="w-6 h-6 md:w-7 md:h-7 shrink-0" fill="currentColor">
+            <path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208z"/>
+          </svg>
 
-        <h2 class="section-title" id="newsletter">Suscritos al Newsletter</h2>
-        <div class="grid">
-          <div class="card">
-            <div class="card-header">
-              <h3>Correos</h3>
-            </div>
-            <div class="card-body small-list">
-              <% if (newsletter.length === 0) { %>
-                <div class="empty">No hay suscritos.</div>
-              <% } else { %>
-                <ul>
-                  <% newsletter.forEach(n => { %>
-                      <li><i class="fas fa-envelope"></i><a href="mailto:<%= n.correo %>"><%= n.correo %></a> - <%= new Date(n.fecha_registro).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }) %></li>
-                  <% }) %>
-                </ul>
-              <% } %>
-            </div>
-            <div class="card-footer muted">Total: <strong><%= newsletter.length %></strong></div>
-            <div class="pagination-newsletter">
-              <% if (newsletterPage > 1) { %>
-                <a href="?newsletterPage=<%= newsletterPage - 1 %>&solicitudPage=<%= solicitudPage %>" class="pag-btn">&laquo;</a>
-              <% } else { %>
-                <span class="pag-btn disabled">&laquo;</span>
-              <% } %>
+          <span>Eliminar</span>
+        </button>
 
-              <% for(let i = 1; i <= newsletterTotalPages; i++) { %>
-                <% if (i === newsletterPage) { %>
-                  <span class="pag-btn active"><%= i %></span>
-                <% } else { %>
-                  <a href="?newsletterPage=<%= i %>&solicitudPage=<%= solicitudPage %>" class="pag-btn"><%= i %></a>
-                <% } %>
-              <% } %>
-
-              <% if (newsletterPage < newsletterTotalPages) { %>
-                <a href="?newsletterPage=<%= newsletterPage + 1 %>&solicitudPage=<%= solicitudPage %>" class="pag-btn">&raquo;</a>
-              <% } else { %>
-                <span class="pag-btn disabled">&raquo;</span>
-              <% } %>
-            </div>
-          </div>
-        </div>
-
-      </section>
-    </main>
+      </div>
+    </div>
+    </div>
   </div>
 
   <script>
-    (function () {
-      const input = document.getElementById('searchInput');
-      const table = document.getElementById('solicitudesTable');
-      if (!input || !table) return;
-      input.addEventListener('input', function () {
-        const q = this.value.toLowerCase();
-        table.querySelectorAll('tbody tr').forEach(row => {
-          if (row.classList.contains('empty')) return;
-          const text = row.innerText.toLowerCase();
-          row.style.display = text.includes(q) ? '' : 'none';
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem('alpex_scroll_pos', window.scrollY);
+    });
+
+    let leadActualId = null;
+
+    function switchTab(tab) {
+      const isSol = tab === 'solicitudes';
+      document.getElementById('tab-solicitudes').classList.toggle('hidden', !isSol);
+      document.getElementById('tab-newsletter').classList.toggle('hidden', isSol);
+
+      const btnSol = document.getElementById('btn-sol');
+      const btnNews = document.getElementById('btn-news');
+
+      if (isSol) {
+        btnSol.className = "px-5 py-2 rounded-lg bg-accent text-black font-bold flex items-center gap-2";
+        btnNews.className = "px-5 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 flex items-center gap-2";
+      } else {
+        btnNews.className = "px-5 py-2 rounded-lg bg-accent text-black font-bold flex items-center gap-2";
+        btnSol.className = "px-5 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 flex items-center gap-2";
+      }
+
+      const url = new URL(window.location);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState({}, '', url);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const scrollPos = sessionStorage.getItem('alpex_scroll_pos');
+
+      if (scrollPos !== null) {
+        window.scrollTo({
+          top: parseInt(scrollPos, 10),
+          behavior: 'auto'
         });
+        sessionStorage.removeItem('alpex_scroll_pos');
+      }
+      const currentTab = "<%= query.tab || 'solicitudes' %>";
+      switchTab(currentTab);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    const columns = document.querySelectorAll('.sortable-list');
+    columns.forEach(col => {
+      new Sortable(col, {
+        group: 'kanban',
+        animation: 150,
+        ghostClass: 'opacity-50',
+        onEnd: async (evt) => {
+          const itemEl = evt.item;
+          const id = itemEl.getAttribute('data-id');
+          const nuevoEstado = evt.to.getAttribute('data-status');
+
+          if (evt.from === evt.to) return;
+
+          try {
+            const res = await fetch(`/solicitudes/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ estado: nuevoEstado })
+            });
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.message);
+          } catch (error) {
+            alert('Error al actualizar el estado');
+            console.error(error);
+            evt.from.appendChild(itemEl);
+          }
+        }
       });
-    })();
+    });
+
+    const modal = document.getElementById('leadModal');
+    const modalContent = document.getElementById('modalContent');
+
+    function openModal(data) {
+      leadActualId = data.id;
+
+      document.getElementById('modalName').innerText = data.nombre_completo;
+      document.getElementById('modalEmailSubtitle').innerText = data.correo;
+      document.getElementById('modalEstado').innerText = data.estado;
+      const interesLabels = {
+        Reinos: 'Reinos de Gondor',
+        Colinas: 'Colinas del Golf',
+        Inversion: 'Quiero ser inversionista'
+      };
+
+      document.getElementById('modalInteres').innerText = interesLabels[data.interes_principal] || data.interes_principal;
+      document.getElementById('modalCorreo').innerText = data.correo;
+      document.getElementById('modalTelefono').innerText = data.telefono;
+      document.getElementById('modalFecha').innerText = new Date(data.fecha_registro).toLocaleString('es-PE');
+
+      document.getElementById('modalMensaje').innerText = data.mensaje || 'Sin mensaje adicional proporcionado por el cliente.';
+      document.getElementById('modalNotas').value = data.notas_internas || '';
+
+      const cleanPhone = data.telefono.replace(/\D/g, '');
+      document.getElementById('btnWhatsapp').href = `https://wa.me/${cleanPhone}?text=Hola%20${encodeURIComponent(data.nombre_completo)},%20te%20contacto%20de%20Alpex.`;
+      document.getElementById('btnGmail').href = `https://mail.google.com/mail/?view=cm&fs=1&to=${data.correo}&su=Contacto%20Alpex`;
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modalContent.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeModal() {
+      modal.classList.add('opacity-0');
+      modalContent.classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+      leadActualId = null;
+    }
+
+    async function guardarNotas() {
+      if (!leadActualId) return;
+      const btn = event.target;
+      const notas = document.getElementById('modalNotas').value;
+
+      const originalText = btn.innerText;
+      btn.innerText = 'Guardando...';
+
+      try {
+        const res = await fetch(`/solicitudes/${leadActualId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notas_internas: notas })
+        });
+
+        if (res.ok) {
+          btn.innerText = '¡Guardado!';
+          btn.classList.add('bg-green-500', 'text-white');
+          setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.remove('bg-green-500', 'text-white');
+          }, 2000);
+        }
+      } catch (error) {
+        alert('Error al guardar la nota');
+        btn.innerText = originalText;
+      }
+    }
+
+    async function eliminarSolicitud() {
+      if (!leadActualId) return;
+
+      const confirmacion = confirm('¿Estás seguro de eliminar este lead permanentemente?');
+      if (!confirmacion) return;
+
+      const btn = document.getElementById('btnEliminar');
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-5 h-5 girar" fill="currentColor">
+          <path d="M208 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm0 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM48 208a48 48 0 1 1 0 96 48 48 0 1 1 0-96zm368 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM75 369.1A48 48 0 1 1 142.9 437 48 48 0 1 1 75 369.1zM75 75A48 48 0 1 1 142.9 142.9 48 48 0 1 1 75 75zM437 369.1A48 48 0 1 1 369.1 437 48 48 0 1 1 437 369.1z"/>
+        </svg>
+        Eliminando...`;
+
+      try {
+        const res = await fetch(`/solicitudes/${leadActualId}`, { method: 'DELETE' });
+        if (res.ok) {
+          const card = document.querySelector(`div[data-id="${leadActualId}"]`);
+          if (card) card.remove();
+
+          closeModal();
+        } else {
+          alert('No se pudo eliminar');
+          btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle" fill="currentColor">
+              <path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z"/>
+            </svg>
+            Eliminar`;
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Error en el servidor al eliminar');
+        btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 inline-block align-middle" fill="currentColor">
+            <path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z"/>
+          </svg>
+          Eliminar`;
+      }
+    }
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
   </script>
 </body>
 

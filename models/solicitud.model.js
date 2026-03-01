@@ -46,6 +46,17 @@ const Solicitud = sequelize.define('Solicitud', {
     allowNull: true,
   },
 
+  estado: {
+    type: DataTypes.ENUM('Nuevo', 'Negociacion', 'Cerrado'),
+    allowNull: false,
+    defaultValue: 'Nuevo'
+  },
+
+  notas_internas: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+
   fecha_registro: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
