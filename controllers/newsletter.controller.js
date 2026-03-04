@@ -78,7 +78,7 @@ exports.createNewsletter = async (req, res, next) => {
       console.log("Correo enviado correctamente");
 
     } catch (err) {
-      console.error("❌ Error enviando correo:", err);
+      console.error("Error enviando correo:", err);
     }
 
     return res.status(201).json(nuevoRegistro);

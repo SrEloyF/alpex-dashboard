@@ -37,7 +37,7 @@ const Solicitud = sequelize.define('Solicitud', {
   },
 
   interes_principal: {
-    type: DataTypes.ENUM('Reinos', 'Colinas', 'Inversion'),
+    type: DataTypes.ENUM('Reinos', 'Colinas', 'Inversion', 'Academia'),
     allowNull: false,
   },
 
@@ -47,7 +47,7 @@ const Solicitud = sequelize.define('Solicitud', {
   },
 
   estado: {
-    type: DataTypes.ENUM('Nuevo', 'Negociacion', 'Cerrado'),
+    type: DataTypes.ENUM('Nuevo', 'Contactado', 'Negociacion', 'Cerrado'),
     allowNull: false,
     defaultValue: 'Nuevo'
   },
