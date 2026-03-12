@@ -4,17 +4,20 @@ const sendEmail = require("../utils/resendMailer");
 const verifyTurnstile = require("../utils/verifyTurnstile");
 
 exports.createNewsletter = async (req, res, next) => {
+  const { website, ["cf-turnstile-response"]: turnstile, ...data } = req.body;
   try {
     try {
-      const token = req.body["cf-turnstile-response"];
+      if (website && website !== "") {
+        return res.status(200).json({ success: true });
+      }
       
-      if (!token) {
+      if (!turnstile) {
         return res.status(400).json({
           error: "Captcha no enviado"
         });
       }
 
-      const valid = await verifyTurnstile(token, req.ip);
+      const valid = await verifyTurnstile(turnstile, req.ip);
 
       if (!valid) {
         return res.status(400).json({ error: "Captcha inválido" });
@@ -25,7 +28,7 @@ exports.createNewsletter = async (req, res, next) => {
       return res.status(500).json({ error: "Error interno del servidor" });
     }
 
-    const nuevoRegistro = await Newsletter.create(req.body);
+    const nuevoRegistro = await Newsletter.create(data);
     const fechaRegistro = new Date(nuevoRegistro.fecha_registro).toLocaleDateString('es-ES');
 
     const emailHTML = `
