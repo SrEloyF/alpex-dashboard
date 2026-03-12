@@ -39,7 +39,10 @@ app.use(session({
 const allowedOrigins = [
   'https://alpex-seven.vercel.app',
   'http://localhost:3000',
+  'http://localhost:5500',
   'https://alpex-back.vercel.app',
+  'https://www.grupoalpex.com',
+  'https://grupoalpex.com'
 ];
 
 const formLimiter = rateLimit({
@@ -72,15 +75,6 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send(`Error interno del servidor:\n ${err}`);
 });
-
-(async () => {
-  try {
-    await sequelize.sync({ alter: true });
-    console.log("Base de datos sincronizada correctamente");
-  } catch (error) {
-    console.error("Error al sincronizar DB:", error);
-  }
-})();
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;

@@ -29,7 +29,6 @@ const Solicitud = sequelize.define('Solicitud', {
   correo: {
     type: DataTypes.STRING(150),
     allowNull: false,
-    unique: true,
     validate: {
       isEmail: true,
       notEmpty: true,

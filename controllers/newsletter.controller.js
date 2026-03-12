@@ -1,9 +1,30 @@
 const Newsletter = require('./../models/newsletter.model');
 const { ValidationError, UniqueConstraintError, Op } = require("sequelize");
 const sendEmail = require("../utils/resendMailer");
+const verifyTurnstile = require("../utils/verifyTurnstile");
 
 exports.createNewsletter = async (req, res, next) => {
   try {
+    try {
+      const token = req.body["cf-turnstile-response"];
+      
+      if (!token) {
+        return res.status(400).json({
+          error: "Captcha no enviado"
+        });
+      }
+
+      const valid = await verifyTurnstile(token, req.ip);
+
+      if (!valid) {
+        return res.status(400).json({ error: "Captcha inválido" });
+      }
+
+    } catch (err) {
+      console.error("Error validando captcha:", err);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
+
     const nuevoRegistro = await Newsletter.create(req.body);
     const fechaRegistro = new Date(nuevoRegistro.fecha_registro).toLocaleDateString('es-ES');
 
@@ -74,8 +95,6 @@ exports.createNewsletter = async (req, res, next) => {
         subject: "¡Bienvenido a la Newsletter de ALPEX!",
         html: emailHTML,
       });
-
-      console.log("Correo enviado correctamente");
 
     } catch (err) {
       console.error("Error enviando correo:", err);
