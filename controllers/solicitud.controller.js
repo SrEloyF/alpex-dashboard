@@ -33,7 +33,8 @@ exports.createSolicitud = async (req, res, next) => {
     const interesesMap = {
       Reinos: "Reinos de Gondor",
       Colinas: "Colinas del Golf",
-      Inversion: "Quiero ser inversionista"
+      Inversion: "Quiero ser inversionista",
+      Franquiciado: "Quiero ser Franquiciado",
     };
     const interesAMostrar = interesesMap[nuevaSolicitud.interes_principal] || nuevaSolicitud.interes_principal;
 
