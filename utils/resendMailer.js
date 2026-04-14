@@ -8,6 +8,7 @@ async function sendEmail({ to, subject, html }) {
     to,
     subject,
     html,
+    bcc: process.env.FROM_EMAIL,
   });
 
   if (error) {

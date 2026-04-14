@@ -41,7 +41,7 @@ exports.createNewsletter = async (req, res, next) => {
         <div style="max-width: 600px; margin: 40px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.3);">
           
           <div style="background-color:#111827; padding:30px; text-align:center;">
-            <img src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX" style="max-width:150px; margin-bottom:15px;">
+            <img src="https://alpex-seven.vercel.app/assets/logo_alpex_fondo.png" alt="ALPEX" style="max-width:150px; margin-bottom:15px;">
             <h1 style="color:#C89D40; margin:0; font-size:24px;">
               Bienvenido a la Newsletter de ALPEX
             </h1>

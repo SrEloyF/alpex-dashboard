@@ -48,7 +48,7 @@ exports.createSolicitud = async (req, res, next) => {
         <div style="max-width: 600px; margin: 40px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.3);">
           
           <div style="background-color:#111827; padding:20px; text-align:center;">
-            <img src="https://alpex-seven.vercel.app/assets/logo_alpex.png" alt="ALPEX" style="max-width:150px; margin-bottom:10px;">
+            <img src="https://alpex-seven.vercel.app/assets/logo_alpex_fondo.png" alt="ALPEX" style="max-width:150px; margin-bottom:10px;">
             <h1 style="color:#C89D40; margin:0; font-size:24px;">¡Bienvenido a ALPEX, ${nuevaSolicitud.nombre_completo}!</h1>
             <p style="color:#E7C77A; margin:5px 0 0;">Gracias por registrarte. Estamos encantados de tenerte con nosotros.</p>
           </div>
